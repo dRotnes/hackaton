@@ -32,6 +32,15 @@ routes.route('/orders/new').post(
     Controller.receiveOrderFile,
 );
 
+/**
+ * Route to receive a new order from the frontend
+ * 
+ * body is a .txt file
+ */
+routes.route('/orders/get').get(
+    Controller.getStockValues,
+);
+
 routes.use((req,res) => {
     res.status(res.locals.status).send(res.locals.data);
 });
@@ -40,8 +49,10 @@ module.exports = routes;
 
 // Private
 async function receiveAndSaveFile(req, res, next) {
+    console.log('RECEIVED');
     // Call multer's single upload function
     upload.single('file')(req, res, (err) => {
+        console.log('yeah');
         if (err) {
             return res.status(500).send(err.message);
         }

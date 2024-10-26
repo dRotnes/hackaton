@@ -228,7 +228,21 @@ function calculateNecessaryStockPerOrder(orders){
         
         updateStockValues(orderTimestamp, tecidoNecessary, fioNecessary, algodaoNecessary, polyesterNecessary);
         // Place new order if necessary
-        checkAndPlaceNewOrder(orderTimestamp, newDate.toISOString());
+        [tecido, fio, alogodao, polyester] = checkAndPlaceNewOrder(orderTimestamp, newDate.toISOString());
+        let fileToCreate = 'Artigo, Preço, Quantidade, Subtotal';
+        if(tecido){
+            file += `Tecido, ${PRICE_PER_MATERIAL.TECIDO}, ${GLOBAL_CONSTANTS.ECONOMICAL_QUANTITY}, ${GLOBAL_CONSTANTS.ECONOMICAL_QUANTITY * PRICE_PER_MATERIAL.TECIDO}`
+        }
+        if(fio){
+            file += `Fio, ${PRICE_PER_MATERIAL.FIO}, ${GLOBAL_CONSTANTS.ECONOMICAL_QUANTITY}, ${GLOBAL_CONSTANTS.ECONOMICAL_QUANTITY * PRICE_PER_MATERIAL.FIO}`
+        }
+        if(algodao){
+            file += `Algodao, ${PRICE_PER_MATERIAL.ALGODAO}, ${GLOBAL_CONSTANTS.ECONOMICAL_QUANTITY}, ${GLOBAL_CONSTANTS.ECONOMICAL_QUANTITY * PRICE_PER_MATERIAL.ALGODAO}`
+        }
+        if(polyester){
+            file += `Polyester, ${PRICE_PER_MATERIAL.POLYESTER}, ${GLOBAL_CONSTANTS.ECONOMICAL_QUANTITY}, ${GLOBAL_CONSTANTS.ECONOMICAL_QUANTITY * PRICE_PER_MATERIAL.POLYESTER}`
+        }
+        console.log(file);
     });
     return STOCK;
 }
@@ -250,6 +264,10 @@ function checkIfSupplyArrived(orderTimestamp){
 function checkAndPlaceNewOrder(orderTimestamp, newDate){
     const formattedDate = formatDateToYYYYMMDD(newDate);
     currentStock = STOCK[orderTimestamp];
+    let tecido = false;
+    let fio = false;
+    let algodao = false;
+    let polyester = false;
 
     if (currentStock.TECIDO <= GLOBAL_CONSTANTS.ORDER_POINT && orderTimestamp >= tecidoInfo.NEXT_SUPPLY_RECEIVEMENT) {
         tecidoInfo.NEXT_SUPPLY_RECEIVEMENT = formattedDate;
@@ -263,6 +281,7 @@ function checkAndPlaceNewOrder(orderTimestamp, newDate){
     if (currentStock.POLYESTER <= GLOBAL_CONSTANTS.ORDER_POINT && orderTimestamp >= polyesterInfo.NEXT_SUPPLY_RECEIVEMENT) {
         polyesterInfo.NEXT_SUPPLY_RECEIVEMENT = formattedDate; 
     }
+    return [tecido, fio, algodao, polyester];
 }
 
 function updateStockValues(orderTimestamp, tecidoNecessary, fioNecessary, algodaoNecessary, polyesterNecessary) {
@@ -282,7 +301,12 @@ function updateStockValues(orderTimestamp, tecidoNecessary, fioNecessary, algoda
     }
 }
 
+function getStock(){
+    return STOCK;
+}
+
 module.exports = {
     parseOrderFromFile: parseOrderFromFile,
     calculateNecessaryStockPerOrder: calculateNecessaryStockPerOrder,
+    getStock: getStock,
 }

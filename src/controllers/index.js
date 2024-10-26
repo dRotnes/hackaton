@@ -8,10 +8,22 @@ async function receiveOrderFile(req, res, next) {
     try {
         // Parse the order file and return it
         const resp = await OrderUtils.parseOrderFromFile(path);
-        const stockChanges = await OrderUtils.calculateNecessaryStockPerOrder(resp, currentStock);
+        await OrderUtils.calculateNecessaryStockPerOrder(resp, currentStock);
 
-        res.locals.status = HTTP_STATUS_MAPPING.SUCCESS;
-        res.locals.data = stockChanges;
+        res.status(200).send('');
+        console.log(stock)
+        next();
+    }
+    catch (error) {
+        res.locals.status = HTTP_STATUS_MAPPING.SERVER_ERROR;
+        next(error);
+    }
+}
+async function getStockValues(req, res, next){
+    try {
+        const resp = await OrderUtils.getStock();
+
+        res.status(200).send(resp);
         next();
     }
     catch (error) {
@@ -22,4 +34,5 @@ async function receiveOrderFile(req, res, next) {
 
 module.exports = {
     receiveOrderFile: receiveOrderFile,
+    getStockValues: getStockValues,
 }   
