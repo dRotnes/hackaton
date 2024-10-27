@@ -42,13 +42,6 @@ const PRICE_PER_MATERIAL = {
     POLYESTER: 10,
 }
 
-const INITIAL_STOCK_VALUES = {
-    TECIDO: 2200,
-    ALGODAO: 2200,
-    FIO: 2200,
-    POLYESTER: 2200,
-}
-
 const GLOBAL_CONSTANTS = {
     DAILY_SEARCH: 137,
     ECONOMICAL_QUANTITY: 1196,
@@ -56,6 +49,7 @@ const GLOBAL_CONSTANTS = {
     ORDER_POINT: 1960,
     DELIVERY_TIME: 7,
 } 
+
 // Global date variable
 let globalDate = new Date('2024-10-25'); // Set to the current date
 let orderId = 0;
@@ -228,21 +222,7 @@ function calculateNecessaryStockPerOrder(orders){
         
         updateStockValues(orderTimestamp, tecidoNecessary, fioNecessary, algodaoNecessary, polyesterNecessary);
         // Place new order if necessary
-        [tecido, fio, alogodao, polyester] = checkAndPlaceNewOrder(orderTimestamp, newDate.toISOString());
-        let fileToCreate = 'Artigo, Preço, Quantidade, Subtotal';
-        if(tecido){
-            file += `Tecido, ${PRICE_PER_MATERIAL.TECIDO}, ${GLOBAL_CONSTANTS.ECONOMICAL_QUANTITY}, ${GLOBAL_CONSTANTS.ECONOMICAL_QUANTITY * PRICE_PER_MATERIAL.TECIDO}`
-        }
-        if(fio){
-            file += `Fio, ${PRICE_PER_MATERIAL.FIO}, ${GLOBAL_CONSTANTS.ECONOMICAL_QUANTITY}, ${GLOBAL_CONSTANTS.ECONOMICAL_QUANTITY * PRICE_PER_MATERIAL.FIO}`
-        }
-        if(algodao){
-            file += `Algodao, ${PRICE_PER_MATERIAL.ALGODAO}, ${GLOBAL_CONSTANTS.ECONOMICAL_QUANTITY}, ${GLOBAL_CONSTANTS.ECONOMICAL_QUANTITY * PRICE_PER_MATERIAL.ALGODAO}`
-        }
-        if(polyester){
-            file += `Polyester, ${PRICE_PER_MATERIAL.POLYESTER}, ${GLOBAL_CONSTANTS.ECONOMICAL_QUANTITY}, ${GLOBAL_CONSTANTS.ECONOMICAL_QUANTITY * PRICE_PER_MATERIAL.POLYESTER}`
-        }
-        console.log(file);
+        checkAndPlaceNewOrder(orderTimestamp, newDate.toISOString());
     });
     return STOCK;
 }
@@ -264,11 +244,6 @@ function checkIfSupplyArrived(orderTimestamp){
 function checkAndPlaceNewOrder(orderTimestamp, newDate){
     const formattedDate = formatDateToYYYYMMDD(newDate);
     currentStock = STOCK[orderTimestamp];
-    let tecido = false;
-    let fio = false;
-    let algodao = false;
-    let polyester = false;
-
     if (currentStock.TECIDO <= GLOBAL_CONSTANTS.ORDER_POINT && orderTimestamp >= tecidoInfo.NEXT_SUPPLY_RECEIVEMENT) {
         tecidoInfo.NEXT_SUPPLY_RECEIVEMENT = formattedDate;
     }
@@ -281,7 +256,6 @@ function checkAndPlaceNewOrder(orderTimestamp, newDate){
     if (currentStock.POLYESTER <= GLOBAL_CONSTANTS.ORDER_POINT && orderTimestamp >= polyesterInfo.NEXT_SUPPLY_RECEIVEMENT) {
         polyesterInfo.NEXT_SUPPLY_RECEIVEMENT = formattedDate; 
     }
-    return [tecido, fio, algodao, polyester];
 }
 
 function updateStockValues(orderTimestamp, tecidoNecessary, fioNecessary, algodaoNecessary, polyesterNecessary) {
@@ -302,7 +276,13 @@ function updateStockValues(orderTimestamp, tecidoNecessary, fioNecessary, algoda
 }
 
 function getStock(){
-    return STOCK;
+    return Object.entries(STOCK).map(([date, values]) => ({
+        date,
+        tecido: values.TECIDO,
+        algodao: values.ALGODAO,
+        fio: values.FIO,
+        poliester: values.POLYESTER
+      }));
 }
 
 module.exports = {

@@ -11,7 +11,6 @@ async function receiveOrderFile(req, res, next) {
         await OrderUtils.calculateNecessaryStockPerOrder(resp, currentStock);
 
         res.status(200).send('');
-        console.log(stock)
         next();
     }
     catch (error) {
@@ -22,8 +21,9 @@ async function receiveOrderFile(req, res, next) {
 async function getStockValues(req, res, next){
     try {
         const resp = await OrderUtils.getStock();
+        console.log('Fetched stock values');
 
-        res.status(200).send(resp);
+        res.status(200).send(resp || []);
         next();
     }
     catch (error) {
